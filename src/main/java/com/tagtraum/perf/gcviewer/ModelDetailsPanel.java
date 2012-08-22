@@ -305,6 +305,8 @@ public class ModelDetailsPanel extends JPanel {
             columnNames.add(localStrings.getString("data_panel_details_max"));
             columnNames.add(localStrings.getString("data_panel_details_avg"));
             columnNames.add(localStrings.getString("data_panel_details_stddev"));
+            columnNames.add(">" + DoubleData.ACCEPT + "s");
+            columnNames.add("90% (s)"/*localStrings.getString("90%")*/);
             columnNames.add(localStrings.getString("data_panel_details_sum"));
             columnNames.add(localStrings.getString("data_panel_details_sum_percent"));
             
@@ -352,22 +354,28 @@ public class ModelDetailsPanel extends JPanel {
         private List<List<String>> createDataList(Map<String, DoubleData> model, double totalPause, boolean showPercentOfTotalPause) {
             double totalSum = getTotalSum(model.entrySet());
             int totalNumber = 0;
+            int totalOutliers = 0;
             
             List<List<String>> dataList = new ArrayList<List<String>>();
             for (Entry<String, DoubleData> entry : model.entrySet()) {
+            	int n = entry.getValue().getN();
+            	int outliers = entry.getValue().outliers();
                 List<String> entryList = new ArrayList<String>();
                 entryList.add(entry.getKey());
-                entryList.add(entry.getValue().getN() + "");
+                entryList.add(n + "");
                 entryList.add(pauseFormatter.format(entry.getValue().getMin()));
                 entryList.add(pauseFormatter.format(entry.getValue().getMax()));
                 entryList.add(pauseFormatter.format(entry.getValue().average()));
                 entryList.add(pauseFormatter.format(entry.getValue().standardDeviation()));
+                entryList.add(outliers+"");
+                entryList.add(pauseFormatter.format(entry.getValue().estimatedPercentile()));
                 entryList.add(pauseFormatter.format(entry.getValue().getSum()));
                 entryList.add(percentFormatter.format(entry.getValue().getSum() / totalSum * 100));
                 
                 dataList.add(entryList);
                 
-                totalNumber += entry.getValue().getN();
+                totalNumber += n;
+                totalOutliers += outliers;
             }
             
             List<String> totalList = new ArrayList<String>();
@@ -376,6 +384,8 @@ public class ModelDetailsPanel extends JPanel {
             totalList.add("");
             totalList.add("");
             totalList.add("");
+            totalList.add("");
+            totalList.add(totalOutliers + "");
             totalList.add("");
             totalList.add(pauseFormatter.format(totalSum));
             totalList.add(showPercentOfTotalPause ? percentFormatter.format(totalSum / totalPause * 100) : "");
