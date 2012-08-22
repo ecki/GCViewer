@@ -100,9 +100,9 @@ public class GCModel implements Serializable {
         this.freedMemoryByFullGC = new IntData();
         this.postFullGCUsedMemory = new IntData();
         this.postGCUsedMemory = new IntData();
-        this.totalPause = new DoubleData();
-        this.fullGCPause = new DoubleData();
-        this.gcPause = new DoubleData();
+        this.totalPause = new DoubleData(true);
+        this.fullGCPause = new DoubleData(true);
+        this.gcPause = new DoubleData(true);
         this.pauseInterval = new DoubleData();
         this.initiatingOccupancyFraction = new DoubleData();
         this.currentRelativePostGCIncrease = new RegressionLine();
@@ -324,7 +324,7 @@ public class GCModel implements Serializable {
     private DoubleData getDoubleData(String key, Map<String, DoubleData> eventMap) {
     	DoubleData data = eventMap.get(key);
     	if (data == null) {
-    		data = new DoubleData();
+    		data = new DoubleData(true);
     		eventMap.put(key, data);
     	}
     	
