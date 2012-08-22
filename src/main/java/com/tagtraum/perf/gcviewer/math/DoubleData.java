@@ -11,28 +11,26 @@ import java.io.Serializable;
  */
 public class DoubleData implements Serializable {
 
+    public final static double ACCEPT = Double.parseDouble(System.getProperty("gcviewer.accept", "2.0"));
+
     private int n;
     private double sum;
     private double sumSquares;
     private double min = Double.MAX_VALUE;
     private double max = Double.MIN_VALUE;
     private int outlier = 0;
-    public final static double ACCEPT = Double.parseDouble(System.getProperty("gcviewer.accept", "2.0"));
 
-    // state: -1 = no updown filter, 0 = first value, 1 = estimated
-    private int state = -1;
-	private double up = 0;
-	private double down = 0;
-	private double est = 0;
+    private double up = 0;
+    private double down = 0;
+    private double est = 0;
 
     public DoubleData() { }
 
     public DoubleData(boolean estimate) {
-    	if (estimate) {
-    		up = 0.1;
-    		down = 0.9;
-    		state = 0;
-    	}
+        if (estimate) {
+            up = 0.1;
+            down = 0.9;
+        }
     }
 
     public void add(double x) {
@@ -45,17 +43,16 @@ public class DoubleData implements Serializable {
         if (x > ACCEPT)
         	outlier++;
 
-        if (state == 0) {
-        	est = x;
-        	state = 1;
-        }
-
-        if (state == 1)
-        {
-        	if (est < x)
-        		est += up * (x - est);
-        	else
-        		est += down * (x - est);
+        // updown filter to estimate (up / (up +down)) percentile
+        if (up != down) {
+            if (n == 1) {
+        	    est = x;
+            } else {
+                if (est < x)
+                    est += up * (x - est);
+                else
+                    est += down * (x - est);
+            }
         }
     }
 
@@ -69,18 +66,8 @@ public class DoubleData implements Serializable {
         if (x > ACCEPT)
         	outlier++;
 
-        if (state == 0) {
-        	est = x;
-        	state = 1;
-        }
-
-        if (state == 1)
-        {
-        	if (est < x)
-        		est += up * (x - est);
-        	else
-        		est += down * (x - est);
-        }
+        if (up != down)
+        	throw new IllegalStateException("Weighted percentile estimate not supported.");
     }
 
     public int getN() {
@@ -122,8 +109,6 @@ public class DoubleData implements Serializable {
         n = 0;
         outlier = 0;
         est = 0;
-        if (state != -1)
-        	state = 0;
     }
 
     public static double average(double[] n) {
