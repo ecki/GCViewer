@@ -18,7 +18,9 @@ public class DataWriterFactory {
     private static ResourceBundle localStrings = ResourceBundle.getBundle("com.tagtraum.perf.gcviewer.localStrings");
 
     public DataWriter getDataWriter(File file, String extension) throws IOException {
-        if (extension.equals(".csv")) {
+        if (extension.equals(".ygc.csv")) {
+            return new CSVYoungDataWriter(new FileOutputStream(file));
+        } else if (extension.equals(".csv")) {
             return new CSVDataWriter(new FileOutputStream(file));
         } else if (extension.equals(".txt")) {
             return new PlainDataWriter(new FileOutputStream(file));

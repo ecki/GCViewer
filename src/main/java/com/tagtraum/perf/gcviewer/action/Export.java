@@ -37,6 +37,7 @@ public class Export extends AbstractAction {
         saveDialog.removeChoosableFileFilter(saveDialog.getAcceptAllFileFilter());
         saveDialog.addChoosableFileFilter(new ExtensionFileFilter(".csv", GCViewer.localStrings.getString("fileexport_dialog_csv")));
         saveDialog.addChoosableFileFilter(new ExtensionFileFilter(".txt", GCViewer.localStrings.getString("fileexport_dialog_txt")));
+        saveDialog.addChoosableFileFilter(new ExtensionFileFilter(".ygc.csv", "fileexport_dialog_ygc_csv"/*GCViewer.localStrings.getString("fileexport_dialog_ygc_csv")*/));
     }
 
     public void actionPerformed(final ActionEvent e) {
