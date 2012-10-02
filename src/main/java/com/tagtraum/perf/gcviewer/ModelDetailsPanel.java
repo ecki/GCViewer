@@ -306,7 +306,6 @@ public class ModelDetailsPanel extends JPanel {
             columnNames.add(localStrings.getString("data_panel_details_avg"));
             columnNames.add(localStrings.getString("data_panel_details_stddev"));
             columnNames.add(">" + DoubleData.ACCEPT + "s");
-            columnNames.add("90% (s)"/*localStrings.getString("90%")*/);
             columnNames.add(localStrings.getString("data_panel_details_sum"));
             columnNames.add(localStrings.getString("data_panel_details_sum_percent"));
             
@@ -368,7 +367,6 @@ public class ModelDetailsPanel extends JPanel {
                 entryList.add(pauseFormatter.format(entry.getValue().average()));
                 entryList.add(pauseFormatter.format(entry.getValue().standardDeviation()));
                 entryList.add(outliers+"");
-                entryList.add(pauseFormatter.format(entry.getValue().estimatedPercentile()));
                 entryList.add(pauseFormatter.format(entry.getValue().getSum()));
                 entryList.add(percentFormatter.format(entry.getValue().getSum() / totalSum * 100));
                 
@@ -386,7 +384,6 @@ public class ModelDetailsPanel extends JPanel {
             totalList.add("");
             totalList.add("");
             totalList.add(totalOutliers + "");
-            totalList.add("");
             totalList.add(pauseFormatter.format(totalSum));
             totalList.add(showPercentOfTotalPause ? percentFormatter.format(totalSum / totalPause * 100) : "");
             
