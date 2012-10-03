@@ -41,11 +41,11 @@ public class UsedYoungRenderer extends PolygonChartRenderer {
                     if (tenuredEvent != null && tenuredEvent.getTotal() > 0) {
                         lastTenuredEvent = tenuredEvent;
                     }
-                    if (lastTenuredEvent == null) lastTenuredEvent = event.getTenured();
                     tenuredEvent = event.getTenured();
+                    if (lastTenuredEvent == null) lastTenuredEvent = tenuredEvent;
                 }
                 // e.g. "GC remark" of G1 algorithm does not contain memory information
-                if (youngEvent.getTotal() > 0) {
+                if (youngEvent.getTotal() > 0 && tenuredEvent != null) {
                     final double timestamp = event.getTimestamp() - model.getFirstPauseTimeStamp();
                     polygon.addPoint(timestamp, lastTenuredEvent.getTotal() + youngEvent.getPreUsed());
                     polygon.addPoint(timestamp, tenuredEvent.getTotal() + youngEvent.getPostUsed());
