@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * The abstract gc event is the base class for all types of events. All sorts of general
@@ -26,6 +28,7 @@ public abstract class AbstractGCEvent<T extends AbstractGCEvent<T>> implements S
     private Type type = Type.UNDEFINED;
     private boolean tenuredDetail;
     private String typeAsString;
+    private Generation generation;
     protected List<T> details;
 
     public Iterator<T> details() {
@@ -43,6 +46,9 @@ public abstract class AbstractGCEvent<T extends AbstractGCEvent<T>> implements S
         if (detail.getType().getGeneration() == Generation.TENURED) {
         	tenuredDetail = true;
         }
+        
+        // will be calculated upon call to "getGeneration()"
+        generation = null;
     }
 
     public boolean hasDetails() {
@@ -102,8 +108,36 @@ public abstract class AbstractGCEvent<T extends AbstractGCEvent<T>> implements S
     	return isStopTheWorld;
     }
     
+    /**
+     * Returns the generation of the event including generation of detail events if present.
+     * @return generation of event including generation of detail events
+     */
     public Generation getGeneration() {
-        return getType().getGeneration();
+        if (generation == null) {
+            if (!hasDetails()) {
+                generation = getType().getGeneration();
+            }
+            else {
+                // find out, what generations the detail events contain
+                Set<Generation> generationSet = new TreeSet<Generation>();
+                for (T detailEvent : details) {
+                    generationSet.add(detailEvent.getType().getGeneration());
+                }
+                
+                if (generationSet.size() > 1 || generationSet.contains(Generation.ALL)) {
+                    generation = Generation.ALL;
+                }
+                else if (generationSet.size() == 1) {
+                    generation  = generationSet.iterator().next();
+                }
+                else {
+                    // default
+                    generation = Generation.YOUNG;
+                }
+            }
+        }
+        
+        return generation;
     }
     
     public double getTimestamp() {
@@ -290,6 +324,10 @@ public abstract class AbstractGCEvent<T extends AbstractGCEvent<T>> implements S
         public static final Type JROCKIT_NURSERY_GC = new Type("jrockit.Nursery GC", Generation.YOUNG);
         public static final Type JROCKIT_PARALLEL_NURSERY_GC = new Type("jrockit.parallel nursery GC", Generation.YOUNG);
 
+        public static final Type JROCKIT_16_OLD_GC = new Type("jrockit.OC", Generation.TENURED);
+        public static final Type JROCKIT_16_YOUNG_GC = new Type("jrockit.YC", Generation.YOUNG);
+        public static final Type JROCKIT_16_PARALLEL_NURSERY_GC = new Type("jrockit.parallel nursery GC", Generation.YOUNG);
+        
         public static final Type FULL_GC = new Type("Full GC", Generation.ALL);
         public static final Type FULL_GC_SYSTEM = new Type("Full GC (System)", Generation.ALL);
         public static final Type GC = new Type("GC", Generation.YOUNG);
@@ -392,6 +430,7 @@ public abstract class AbstractGCEvent<T extends AbstractGCEvent<T>> implements S
         public static final Type G1_CONCURRENT_MARK_START = new Type("GC concurrent-mark-start", "GC concurrent-mark-start", Generation.TENURED, Concurrency.CONCURRENT, GcPattern.GC);
         public static final Type G1_CONCURRENT_MARK_END = new Type("GC concurrent-mark-end", "GC concurrent-mark-end,", Generation.TENURED, Concurrency.CONCURRENT, GcPattern.GC_PAUSE);
         public static final Type G1_CONCURRENT_MARK_ABORT = new Type("GC concurrent-mark-abort", "GC concurrent-mark-abort", Generation.TENURED, Concurrency.CONCURRENT, GcPattern.GC);
+        public static final Type G1_CONCURRENT_MARK_RESET_FOR_OVERFLOW = new Type("GC concurrent-mark-reset-for-overflow", "GC concurrent-mark-reset-for-overflow", Generation.TENURED, Concurrency.CONCURRENT, GcPattern.GC);
         public static final Type G1_CONCURRENT_COUNT_START = new Type("GC concurrent-count-start", "GC concurrent-count-start", Generation.TENURED, Concurrency.CONCURRENT, GcPattern.GC);
         public static final Type G1_CONCURRENT_COUNT_END = new Type("GC concurrent-count-end", "GC concurrent-count-end,", Generation.TENURED, Concurrency.CONCURRENT, GcPattern.GC_PAUSE);
         public static final Type G1_CONCURRENT_CLEANUP_START = new Type("GC concurrent-cleanup-start", "GC concurrent-cleanup-start", Generation.TENURED, Concurrency.CONCURRENT, GcPattern.GC);
