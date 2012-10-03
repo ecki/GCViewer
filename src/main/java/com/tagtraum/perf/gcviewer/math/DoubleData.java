@@ -16,6 +16,10 @@ public class DoubleData implements Serializable {
     private double sumSquares;
     private double min = Double.MAX_VALUE;
     private double max = Double.MIN_VALUE;
+    private int outlier = 0;
+
+    public final static double ACCEPT = Double.parseDouble(System.getProperty("gcviewer.accept", "2.0"));
+
 
     public void add(double x) {
         sum += x;
@@ -23,6 +27,9 @@ public class DoubleData implements Serializable {
         n++;
         min = Math.min(min, x);
         max = Math.max(max, x);
+
+        if (x > ACCEPT)
+        	outlier++;
     }
 
     public void add(double x, int weight) {
@@ -31,6 +38,9 @@ public class DoubleData implements Serializable {
         sumSquares += x*x*weight;
         min = Math.min(min, x);
         max = Math.max(max, x);
+
+        if (x > ACCEPT)
+        	outlier+=weight;
     }
 
     public int getN() {
@@ -70,6 +80,7 @@ public class DoubleData implements Serializable {
         sum = 0;
         sumSquares = 0;
         n = 0;
+        outlier = 0;
     }
 
     public static double average(double[] n) {
@@ -85,4 +96,8 @@ public class DoubleData implements Serializable {
         }
         return sum / m;
     }
+
+	public int outliers() {
+		return outlier;
+	}
 }
